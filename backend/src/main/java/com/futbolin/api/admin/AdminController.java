@@ -1,6 +1,7 @@
 package com.futbolin.api.admin;
 
 import com.futbolin.application.admin.AdminService;
+import com.futbolin.application.tournament.TournamentService;
 import com.futbolin.data.entity.*;
 import com.futbolin.data.repository.*;
 import org.springframework.data.domain.PageRequest;
@@ -25,6 +26,8 @@ public class AdminController {
     private final RankingSeasonRepository seasons;
     private final MissionRepository missions;
     private final CosmeticRepository cosmetics;
+    private final TournamentService tournamentService;
+    private final TournamentRepository tournaments;
 
     public AdminController(
             AdminService adminService,
@@ -35,7 +38,9 @@ public class AdminController {
             MatchRepository matches,
             RankingSeasonRepository seasons,
             MissionRepository missions,
-            CosmeticRepository cosmetics
+            CosmeticRepository cosmetics,
+            TournamentService tournamentService,
+            TournamentRepository tournaments
     ) {
         this.adminService = adminService;
         this.questions = questions;
@@ -46,6 +51,8 @@ public class AdminController {
         this.seasons = seasons;
         this.missions = missions;
         this.cosmetics = cosmetics;
+        this.tournamentService = tournamentService;
+        this.tournaments = tournaments;
     }
 
     @GetMapping("/dashboard")
@@ -119,13 +126,33 @@ public class AdminController {
         return seasons.save(season);
     }
 
+    @GetMapping("/missions")
+    public Object missions() {
+        return missions.findAll();
+    }
+
     @PostMapping("/missions")
     public MissionEntity createMission(@RequestBody MissionEntity mission) {
         return missions.save(mission);
     }
 
+    @GetMapping("/cosmetics")
+    public Object cosmetics() {
+        return cosmetics.findAll();
+    }
+
     @PostMapping("/cosmetics")
     public CosmeticEntity createCosmetic(@RequestBody CosmeticEntity cosmetic) {
         return cosmetics.save(cosmetic);
+    }
+
+    @GetMapping("/tournaments")
+    public Object tournaments() {
+        return tournaments.findAllByOrderByCreatedAtDesc();
+    }
+
+    @PostMapping("/tournaments")
+    public TournamentEntity createTournament(@RequestBody Map<String, String> body) {
+        return tournamentService.create(body.getOrDefault("name", "Copa Futbolín"), body.get("theme"));
     }
 }

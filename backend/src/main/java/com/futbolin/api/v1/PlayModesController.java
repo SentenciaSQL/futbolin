@@ -1,9 +1,9 @@
 package com.futbolin.api.v1;
 
 import com.futbolin.application.daily.DailyChallengeService;
+import com.futbolin.application.notification.NotificationService;
 import com.futbolin.application.survival.SurvivalService;
 import com.futbolin.core.security.UserPrincipal;
-import com.futbolin.data.repository.NotificationRepository;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,12 +15,12 @@ public class PlayModesController {
 
     private final DailyChallengeService dailyChallengeService;
     private final SurvivalService survivalService;
-    private final NotificationRepository notifications;
+    private final NotificationService notifications;
 
     public PlayModesController(
             DailyChallengeService dailyChallengeService,
             SurvivalService survivalService,
-            NotificationRepository notifications
+            NotificationService notifications
     ) {
         this.dailyChallengeService = dailyChallengeService;
         this.survivalService = survivalService;
@@ -56,6 +56,6 @@ public class PlayModesController {
 
     @GetMapping("/notifications")
     public Object notifications(@AuthenticationPrincipal UserPrincipal principal) {
-        return notifications.findByUserIdOrderByCreatedAtDesc(principal.id());
+        return notifications.list(principal.id());
     }
 }

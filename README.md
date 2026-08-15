@@ -66,38 +66,48 @@ Los tests usan H2 y no necesitan Redis (`app.redis.enabled=false`).
 
 ```bash
 cd mobile
-flutter create . --platforms=android,ios
 flutter pub get
 flutter run --dart-define=API_URL=http://10.0.2.2:8080 --dart-define=WS_URL=ws://10.0.2.2:8080/ws/match?token=
 ```
 
-Idiomas: español e inglés (`assets/i18n`). Preparado para PT/FR/IT/DE.
+Si el proyecto iOS no tiene `.xcodeproj` (se genera en un Mac):
+
+```bash
+flutter create . --platforms=ios
+```
+
+Idiomas: ES, EN, PT, FR, IT, DE (`assets/i18n`). Celebración de gol con Lottie (`assets/animations/goal.json`). Enlaces de invitación: `futbolin://join/FUT-XXXX`.
 
 ## WebSocket
 
 `/ws/match?token=<access JWT>`
 
-Eventos: `QUEUE`, `ANSWER`, `REMATCH`, `EMOJI` y del servidor `MATCH_FOUND`, `QUESTION`, `ANSWER_RESULT`, `BALL_MOVED`, `GOAL`, `MATCH_FINISHED`, `PLAYER_DISCONNECTED`, `PLAYER_RECONNECTED`.
+Eventos cliente: `QUEUE`, `CANCEL_QUEUE`, `ANSWER`, `REMATCH`, `EMOJI`, `MUTE`, `HEARTBEAT`.
+Eventos servidor: `MATCH_FOUND`, `QUESTION`, `ANSWER_RESULT`, `BALL_MOVED`, `GOAL`, `MATCH_FINISHED`, `PLAYER_DISCONNECTED`, `PLAYER_RECONNECTED`, `EMOJI`, `MUTED`.
 
 El cliente **no** envía el tiempo de respuesta. El servidor calcula `responseMs` al recibir el mensaje y rechaza respuestas imposiblemente rápidas.
 
-## Importación masiva
-
-CSV / Excel / JSON con columnas:
-
-`question, option_a, option_b, option_c, option_d, correct_answer, category, difficulty, explanation`
-
-Ejemplo: `docs/sample-questions.csv`. Los duplicados se detectan por el texto en español.
-
 ## API versionada
 
-`/api/v1/auth/register|login|refresh`
-`/api/v1/users/me`
-`/api/v1/matches/queue|private`
-`/api/v1/rankings`
+`/api/v1/auth/register|login|refresh|social`
+`/api/v1/users/me` · historial, rivalidades, perfil público `GET /users/{id}`
+`/api/v1/matches/queue|private` (invite `futbolin://join/FUT-XXXX`)
+`/api/v1/friends` · ranking de amigos
+`/api/v1/tournaments` · copa de 16, octavos → final
+`/api/v1/devices` · token FCM
+`/api/v1/rankings` · global, semanal, amigos, temporada
 `/api/v1/missions`
 `/api/v1/store/cosmetics`
-`/api/v1/admin/**` (rol ADMIN)
+`/api/v1/admin/**` (rol ADMIN): preguntas, temporadas, misiones, cosméticos, torneos
+
+## Torneos
+
+Cuadro fijo de 16 jugadores (1v16 … 8v9). Al llenarse el cupo arrancan los octavos. El ganador de cada cruce avanza; el servidor es autoridad del resultado.
+
+## Push y OAuth
+
+- Los tokens de dispositivo se guardan en `device_tokens`. Con `FCM_PROJECT_ID` el backend registra el envío (implementación lista para HTTP v1).
+- Google/Apple: verificación JWKS (Nimbus). En desarrollo, `app.oauth.allow-insecure-dev=true` acepta JWT sin firma para tests.
 
 ## Motor de juego
 
@@ -105,3 +115,4 @@ Ejemplo: `docs/sample-questions.csv`. Los duplicados se detectan por el texto en
 - 4 minutos o primero a 3 goles
 - Empate → penales de trivia (5) y muerte súbita
 - Abandono si no reconecta en 15 segundos
+- El Elo ranked no se aplica a torneos ni partidas privadas

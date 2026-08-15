@@ -13,6 +13,10 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
         <a routerLink="/reports" routerLinkActive="text-gold" class="block">Reportes</a>
         <a routerLink="/users" routerLinkActive="text-gold" class="block">Usuarios</a>
         <a routerLink="/matches" routerLinkActive="text-gold" class="block">Partidas</a>
+        <a routerLink="/seasons" routerLinkActive="text-gold" class="block">Temporadas</a>
+        <a routerLink="/missions" routerLinkActive="text-gold" class="block">Misiones</a>
+        <a routerLink="/cosmetics" routerLinkActive="text-gold" class="block">Cosméticos</a>
+        <a routerLink="/tournaments" routerLinkActive="text-gold" class="block">Torneos</a>
       </aside>
       <main class="p-8 overflow-auto"><router-outlet /></main>
     </div>

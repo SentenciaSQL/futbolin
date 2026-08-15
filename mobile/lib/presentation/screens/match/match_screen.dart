@@ -9,6 +9,7 @@ import 'package:futbolin/core/theme/app_theme.dart';
 import 'package:futbolin/presentation/providers/locale_provider.dart';
 import 'package:futbolin/presentation/widgets/pitch_widget.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lottie/lottie.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 class MatchScreen extends ConsumerStatefulWidget {
@@ -98,9 +99,12 @@ class _MatchScreenState extends ConsumerState<MatchScreen> {
           ),
           PitchWidget(position: pos is int ? pos : int.tryParse('$pos') ?? 0, possessionUserId: '${state['possessionUserId'] ?? ''}'),
           if (celebration == 'GOAL')
-            Padding(
-              padding: const EdgeInsets.all(8),
-              child: Text(s.goal, style: const TextStyle(fontSize: 28, color: AppTheme.gold, fontWeight: FontWeight.w900)),
+            SizedBox(
+              height: 120,
+              child: Stack(alignment: Alignment.center, children: [
+                Lottie.asset('assets/animations/goal.json', repeat: false),
+                Text(s.goal, style: const TextStyle(fontSize: 28, color: AppTheme.gold, fontWeight: FontWeight.w900)),
+              ]),
             ),
           if (celebration == 'RECONNECT') Text(s.reconnecting),
           Expanded(child: _questionCard()),
@@ -118,6 +122,9 @@ class _MatchScreenState extends ConsumerState<MatchScreen> {
               padding: const EdgeInsets.all(8),
               child: Wrap(spacing: 8, children: [
                 _emoji('👏'), _emoji('😂'), _emoji('😱'), _emoji('🔥'), _emoji('⚽'),
+                ActionChip(label: const Text('Silenciar'), onPressed: () {
+                  _channel?.sink.add(jsonEncode({'type': 'MUTE', 'matchId': widget.matchId}));
+                }),
               ]),
             ),
         ]),

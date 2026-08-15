@@ -9,13 +9,14 @@ public record AppProperties(
         OAuth oauth,
         Match match,
         Cors cors,
-        Seed seed
+        Seed seed,
+        Fcm fcm
 ) {
     public record Redis(boolean enabled) {}
 
     public record Jwt(String secret, long accessTokenMinutes, long refreshTokenDays) {}
 
-    public record OAuth(String googleClientId, String appleAudience) {}
+    public record OAuth(String googleClientId, String appleAudience, boolean allowInsecureDev) {}
 
     public record Match(
             int questionSeconds,
@@ -30,4 +31,6 @@ public record AppProperties(
     public record Cors(String allowedOrigins) {}
 
     public record Seed(String adminEmail, String adminPassword, String adminUsername) {}
+
+    public record Fcm(String projectId, String credentialsJson) {}
 }

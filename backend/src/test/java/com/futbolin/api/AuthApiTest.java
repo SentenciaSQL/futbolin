@@ -55,6 +55,21 @@ class AuthApiTest {
     }
 
     @Test
+    void socialLoginAcceptsUnsignedJwtInDev() throws Exception {
+        String payload = java.util.Base64.getUrlEncoder().withoutPadding()
+                .encodeToString("{\"sub\":\"google-sub-1\",\"email\":\"social@futbolin.app\",\"name\":\"Social\"}".getBytes());
+        String header = java.util.Base64.getUrlEncoder().withoutPadding()
+                .encodeToString("{\"alg\":\"none\"}".getBytes());
+        String idToken = header + "." + payload + ".";
+        mockMvc.perform(post("/api/v1/auth/social")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"provider\":\"google\",\"idToken\":\"" + idToken + "\",\"username\":\"socialfc\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.accessToken").isNotEmpty())
+                .andExpect(jsonPath("$.username").value("socialfc"));
+    }
+
+    @Test
     void duplicateEmailIsRejected() throws Exception {
         RegisterRequest register = new RegisterRequest(
                 "dup@futbolin.app", "dupuser", "Password1!", "Dup", "AR", "Boca"

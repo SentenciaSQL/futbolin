@@ -8,4 +8,5 @@ import java.util.UUID;
 
 public interface NotificationRepository extends JpaRepository<NotificationEntity, UUID> {
     List<NotificationEntity> findByUserIdOrderByCreatedAtDesc(UUID userId);
+    long countByUserIdAndTypeAndCreatedAtAfter(UUID userId, String type, java.time.Instant after);
 }

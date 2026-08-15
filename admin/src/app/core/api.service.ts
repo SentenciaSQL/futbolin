@@ -53,4 +53,36 @@ export class ApiService {
   matches(page = 0) {
     return this.http.get<any>(`${this.base}/admin/matches?page=${page}`, { headers: this.headers() });
   }
+
+  seasons() {
+    return this.http.get<any>(`${this.base}/admin/seasons`, { headers: this.headers() });
+  }
+
+  createSeason(body: unknown) {
+    return this.http.post(`${this.base}/admin/seasons`, body, { headers: this.headers() });
+  }
+
+  missions() {
+    return this.http.get<any>(`${this.base}/admin/missions`, { headers: this.headers() });
+  }
+
+  createMission(body: unknown) {
+    return this.http.post(`${this.base}/admin/missions`, body, { headers: this.headers() });
+  }
+
+  cosmetics() {
+    return this.http.get<any>(`${this.base}/admin/cosmetics`, { headers: this.headers() });
+  }
+
+  createCosmetic(body: unknown) {
+    return this.http.post(`${this.base}/admin/cosmetics`, body, { headers: this.headers() });
+  }
+
+  tournaments() {
+    return this.http.get<any>(`${this.base}/admin/tournaments`, { headers: this.headers() });
+  }
+
+  createTournament(body: unknown) {
+    return this.http.post(`${this.base}/admin/tournaments`, body, { headers: this.headers() });
+  }
 }

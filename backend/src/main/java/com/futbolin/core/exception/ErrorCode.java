@@ -22,7 +22,11 @@ public enum ErrorCode {
     ALREADY_ANSWERED(HttpStatus.CONFLICT, "Already answered this round"),
     QUESTION_REPORTED(HttpStatus.CONFLICT, "Question already reported"),
     INSUFFICIENT_COINS(HttpStatus.CONFLICT, "Not enough Football Coins"),
-    IMPORT_FAILED(HttpStatus.BAD_REQUEST, "Question import failed");
+    IMPORT_FAILED(HttpStatus.BAD_REQUEST, "Question import failed"),
+    TOURNAMENT_FULL(HttpStatus.CONFLICT, "Tournament is full"),
+    TOURNAMENT_NOT_JOINABLE(HttpStatus.CONFLICT, "Tournament is not open for registration"),
+    ALREADY_JOINED(HttpStatus.CONFLICT, "Already joined"),
+    NOT_YOUR_MATCH(HttpStatus.FORBIDDEN, "Not your match");
 
     private final HttpStatus status;
     private final String defaultMessage;

@@ -29,7 +29,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.Base64;
 import java.util.UUID;
 
 @Service
@@ -43,6 +42,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AppProperties properties;
+    private final SocialTokenVerifier socialTokenVerifier;
 
     public AuthService(
             UserRepository users,
@@ -50,7 +50,8 @@ public class AuthService {
             PasswordResetTokenRepository resetTokens,
             PasswordEncoder passwordEncoder,
             JwtService jwtService,
-            AppProperties properties
+            AppProperties properties,
+            SocialTokenVerifier socialTokenVerifier
     ) {
         this.users = users;
         this.refreshTokens = refreshTokens;
@@ -58,6 +59,7 @@ public class AuthService {
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
         this.properties = properties;
+        this.socialTokenVerifier = socialTokenVerifier;
     }
 
     @Transactional
@@ -169,7 +171,7 @@ public class AuthService {
         if (provider == AuthProvider.LOCAL) {
             throw new ApiException(ErrorCode.VALIDATION, "Unsupported provider");
         }
-        SocialIdentity identity = parseIdentity(provider, request.idToken());
+        SocialIdentity identity = socialTokenVerifier.verify(provider, request.idToken());
         UserEntity user = users.findByProviderAndProviderId(provider, identity.subject())
                 .or(() -> users.findByEmail(identity.email()))
                 .orElseGet(() -> createSocialUser(provider, identity, request.username()));
@@ -204,33 +206,6 @@ public class AuthService {
         return users.save(user);
     }
 
-    private SocialIdentity parseIdentity(AuthProvider provider, String idToken) {
-        try {
-            String[] parts = idToken.split("\\.");
-            if (parts.length < 2) {
-                throw new ApiException(ErrorCode.INVALID_TOKEN);
-            }
-            String payload = new String(Base64.getUrlDecoder().decode(parts[1]));
-            com.fasterxml.jackson.databind.JsonNode json = new com.fasterxml.jackson.databind.ObjectMapper().readTree(payload);
-            String email = json.path("email").asText(null);
-            String sub = json.path("sub").asText(null);
-            if (email == null || sub == null) {
-                throw new ApiException(ErrorCode.INVALID_TOKEN);
-            }
-            String audience = json.path("aud").asText("");
-            if (provider == AuthProvider.GOOGLE && properties.oauth().googleClientId() != null
-                    && !properties.oauth().googleClientId().isBlank()
-                    && !audience.contains(properties.oauth().googleClientId())) {
-                throw new ApiException(ErrorCode.INVALID_TOKEN);
-            }
-            return new SocialIdentity(sub, Codes.normalizeEmail(email));
-        } catch (ApiException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new ApiException(ErrorCode.INVALID_TOKEN);
-        }
-    }
-
     private TokenResponse issue(UserEntity user) {
         String access = jwtService.createAccessToken(user.getId(), user.getUsername(), user.getRole());
         String refresh = jwtService.createRefreshToken(user.getId());
@@ -241,6 +216,4 @@ public class AuthService {
         refreshTokens.save(entity);
         return TokenResponse.of(access, refresh, properties.jwt().accessTokenMinutes() * 60, user.getId(), user.getUsername());
     }
-
-    private record SocialIdentity(String subject, String email) {}
 }

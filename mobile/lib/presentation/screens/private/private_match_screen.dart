@@ -28,6 +28,7 @@ class _PrivateMatchScreenState extends ConsumerState<PrivateMatchScreen> {
             child: const Text('Crear código FUT-XXXX'),
           ),
           if (created != null) Padding(padding: const EdgeInsets.all(12), child: Text(created!, style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold))),
+          if (created != null) Text('Invitación: futbolin://join/$created', textAlign: TextAlign.center),
           const Divider(),
           TextField(controller: code, decoration: const InputDecoration(hintText: 'FUT-8392')),
           const SizedBox(height: 8),

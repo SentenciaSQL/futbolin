@@ -4,6 +4,7 @@ import com.futbolin.core.exception.ApiException;
 import com.futbolin.core.exception.ErrorCode;
 import com.futbolin.data.entity.UserProfileEntity;
 import com.futbolin.data.repository.UserProfileRepository;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
@@ -21,18 +22,28 @@ public class MatchmakingService {
 
     private final Map<UUID, MatchmakingTicket> queue = new ConcurrentHashMap<>();
     private final UserProfileRepository profiles;
+    private final ObjectProvider<RedisMatchCache> redisCache;
 
-    public MatchmakingService(UserProfileRepository profiles) {
+    public MatchmakingService(UserProfileRepository profiles, ObjectProvider<RedisMatchCache> redisCache) {
         this.profiles = profiles;
+        this.redisCache = redisCache;
     }
 
     public void enqueue(UUID userId, int latencyMs) {
         UserProfileEntity profile = profiles.findById(userId).orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND));
         queue.put(userId, MatchmakingTicket.from(profile, latencyMs));
+        RedisMatchCache cache = redisCache.getIfAvailable();
+        if (cache != null) {
+            cache.putTicket(userId, profile.getRankingPoints());
+        }
     }
 
     public void cancel(UUID userId) {
         queue.remove(userId);
+        RedisMatchCache cache = redisCache.getIfAvailable();
+        if (cache != null) {
+            cache.removeTicket(userId);
+        }
     }
 
     public boolean isQueued(UUID userId) {
@@ -57,6 +68,11 @@ public class MatchmakingService {
                 .map(opp -> {
                     queue.remove(userId);
                     queue.remove(opp.userId());
+                    RedisMatchCache cache = redisCache.getIfAvailable();
+                    if (cache != null) {
+                        cache.removeTicket(userId);
+                        cache.removeTicket(opp.userId());
+                    }
                     return new Pair(userId, opp.userId());
                 });
     }

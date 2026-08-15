@@ -13,8 +13,11 @@ import com.futbolin.data.entity.*;
 import com.futbolin.data.repository.*;
 import com.futbolin.domain.match.*;
 import com.futbolin.domain.question.Difficulty;
+import com.futbolin.domain.ranking.EloCalculator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -49,6 +52,8 @@ public class MatchService {
     private final MatchEventPublisher publisher;
     private final AppProperties properties;
     private final ObjectMapper objectMapper;
+    private final ApplicationEventPublisher applicationEvents;
+    private final ObjectProvider<RedisMatchCache> redisCache;
 
     public MatchService(
             MatchRepository matches,
@@ -67,7 +72,9 @@ public class MatchService {
             ProgressionService progressionService,
             MatchEventPublisher publisher,
             AppProperties properties,
-            ObjectMapper objectMapper
+            ObjectMapper objectMapper,
+            ApplicationEventPublisher applicationEvents,
+            ObjectProvider<RedisMatchCache> redisCache
     ) {
         this.matches = matches;
         this.matchPlayers = matchPlayers;
@@ -86,6 +93,8 @@ public class MatchService {
         this.publisher = publisher;
         this.properties = properties;
         this.objectMapper = objectMapper;
+        this.applicationEvents = applicationEvents;
+        this.redisCache = redisCache;
     }
 
     public MatchRules rules() {
@@ -412,9 +421,14 @@ public class MatchService {
         boolean winA = session.state.winnerId() != null && session.state.winnerId().equals(session.state.playerA());
         boolean winB = session.state.winnerId() != null && session.state.winnerId().equals(session.state.playerB());
         boolean draw = session.state.winnerId() == null;
-        var elo = rankingService.apply(pA, pB, session.state.scoreA(), session.state.scoreB(),
-                correctA, Math.max(totalA, 1), session.state.scoreA(),
-                correctB, Math.max(totalB, 1), session.state.scoreB());
+        EloCalculator.Result elo;
+        if (match.getMode() == MatchMode.RANKED) {
+            elo = rankingService.apply(pA, pB, session.state.scoreA(), session.state.scoreB(),
+                    correctA, Math.max(totalA, 1), session.state.scoreA(),
+                    correctB, Math.max(totalB, 1), session.state.scoreB());
+        } else {
+            elo = new EloCalculator.Result(0, 0, pA.getRankingPoints(), pB.getRankingPoints());
+        }
         mpA.setRatingAfter(pA.getRankingPoints());
         mpB.setRatingAfter(pB.getRankingPoints());
         mpA.setRatingDelta(elo.deltaA());
@@ -455,7 +469,47 @@ public class MatchService {
                 "xpB", xpB
         ));
         registry.remove(match.getId());
+        applicationEvents.publishEvent(new MatchCompletedEvent(match.getId(), session.state.winnerId(), match.getMode()));
+        RedisMatchCache cache = redisCache.getIfAvailable();
+        if (cache != null) {
+            cache.cacheLiveMatch(match.getId(), cache.toJson(Map.of(
+                    "status", "FINISHED",
+                    "scoreA", session.state.scoreA(),
+                    "scoreB", session.state.scoreB()
+            )));
+        }
         log.info("Match {} finished {}-{} reason={}", match.getId(), session.state.scoreA(), session.state.scoreB(), session.state.endReason());
+    }
+
+    public UUID opponentId(UUID matchId, UUID userId) {
+        return registry.get(matchId).map(session -> {
+            if (userId.equals(session.state.playerA())) {
+                return session.state.playerB();
+            }
+            if (userId.equals(session.state.playerB())) {
+                return session.state.playerA();
+            }
+            return null;
+        }).orElseGet(() -> matches.findById(matchId).map(match -> {
+            if (match.getPlayerA() != null && userId.equals(match.getPlayerA().getId()) && match.getPlayerB() != null) {
+                return match.getPlayerB().getId();
+            }
+            if (match.getPlayerB() != null && userId.equals(match.getPlayerB().getId()) && match.getPlayerA() != null) {
+                return match.getPlayerA().getId();
+            }
+            return null;
+        }).orElse(null));
+    }
+
+    @Transactional
+    public void muteOpponent(UUID userId, UUID matchId) {
+        MatchPlayerEntity player = matchPlayers.findByMatchIdAndUserId(matchId, userId)
+                .orElseThrow(() -> new ApiException(ErrorCode.NOT_YOUR_MATCH));
+        player.setMuted(true);
+    }
+
+    public boolean isMutedBy(UUID matchId, UUID userId) {
+        return matchPlayers.findByMatchIdAndUserId(matchId, userId).map(MatchPlayerEntity::isMuted).orElse(false);
     }
 
     private long answersOf(UUID matchId, UUID userId) {

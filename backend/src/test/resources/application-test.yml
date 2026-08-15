@@ -26,6 +26,11 @@ spring:
 app:
   redis:
     enabled: false
+  oauth:
+    allow-insecure-dev: true
+  fcm:
+    project-id: ""
+    credentials-json: ""
 
 management:
   health:

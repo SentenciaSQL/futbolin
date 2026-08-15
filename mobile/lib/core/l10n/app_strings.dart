@@ -24,15 +24,31 @@ class AppStrings {
   String get dailyQuestion => _values['dailyQuestion'] ?? 'Pregunta del día';
   String get survival => _values['survival'] ?? 'Supervivencia';
   String get reconnecting => _values['reconnecting'] ?? 'Reconectando...';
+  String get history => _values['history'] ?? 'Historial';
+  String get friends => _values['friends'] ?? 'Amigos';
+  String get tournaments => _values['tournaments'] ?? 'Torneos';
+  String get rivalries => _values['rivalries'] ?? 'Rivalidades';
+
+  static const supported = ['es', 'en', 'pt', 'fr', 'it', 'de'];
 
   static Future<AppStrings> load(Locale locale) async {
-    final code = locale.languageCode == 'en' ? 'en' : 'es';
+    final code = supported.contains(locale.languageCode) ? locale.languageCode : 'es';
     final raw = await rootBundle.loadString('assets/i18n/$code.json');
     final map = (jsonDecode(raw) as Map<String, dynamic>).map((k, v) => MapEntry(k, '$v'));
     return AppStrings(map);
   }
 
-  static AppStrings of(Locale locale) => locale.languageCode == 'en' ? _en : _es;
+  static AppStrings of(Locale locale) {
+    final code = locale.languageCode;
+    return switch (code) {
+      'en' => _en,
+      'pt' => _pt,
+      'fr' => _fr,
+      'it' => _it,
+      'de' => _de,
+      _ => _es,
+    };
+  }
 
   static final _es = AppStrings({
     'appName': 'Futbolín',
@@ -52,6 +68,10 @@ class AppStrings {
     'dailyQuestion': 'Pregunta del día',
     'survival': 'Supervivencia',
     'reconnecting': 'Reconectando...',
+    'history': 'Historial',
+    'friends': 'Amigos',
+    'tournaments': 'Torneos',
+    'rivalries': 'Rivalidades',
   });
 
   static final _en = AppStrings({
@@ -72,5 +92,105 @@ class AppStrings {
     'dailyQuestion': 'Question of the day',
     'survival': 'Survival',
     'reconnecting': 'Reconnecting...',
+    'history': 'History',
+    'friends': 'Friends',
+    'tournaments': 'Tournaments',
+    'rivalries': 'Rivalries',
+  });
+
+  static final _pt = AppStrings({
+    'appName': 'Futbolín',
+    'playNow': 'JOGAR AGORA',
+    'privateMatch': 'Partida privada',
+    'ranking': 'Ranking',
+    'missions': 'Missões',
+    'profile': 'Perfil',
+    'store': 'Loja',
+    'season': 'Temporada',
+    'login': 'Entrar',
+    'register': 'Criar conta',
+    'rematch': 'REVANCHE',
+    'findAnother': 'BUSCAR OUTRO RIVAL',
+    'searchingRival': 'Procurando rival...',
+    'goal': 'GOOOOOOL!',
+    'dailyQuestion': 'Pergunta do dia',
+    'survival': 'Sobrevivência',
+    'reconnecting': 'Reconectando...',
+    'history': 'Histórico',
+    'friends': 'Amigos',
+    'tournaments': 'Torneios',
+    'rivalries': 'Rivalidades',
+  });
+
+  static final _fr = AppStrings({
+    'appName': 'Futbolín',
+    'playNow': 'JOUER',
+    'privateMatch': 'Match privé',
+    'ranking': 'Classement',
+    'missions': 'Missions',
+    'profile': 'Profil',
+    'store': 'Boutique',
+    'season': 'Saison',
+    'login': 'Connexion',
+    'register': 'Créer un compte',
+    'rematch': 'REVANCHE',
+    'findAnother': 'AUTRE ADVERSAIRE',
+    'searchingRival': 'Recherche d’adversaire...',
+    'goal': 'BUUUUUT !',
+    'dailyQuestion': 'Question du jour',
+    'survival': 'Survie',
+    'reconnecting': 'Reconnexion...',
+    'history': 'Historique',
+    'friends': 'Amis',
+    'tournaments': 'Tournois',
+    'rivalries': 'Rivalités',
+  });
+
+  static final _it = AppStrings({
+    'appName': 'Futbolín',
+    'playNow': 'GIOCA ORA',
+    'privateMatch': 'Partita privata',
+    'ranking': 'Classifica',
+    'missions': 'Missioni',
+    'profile': 'Profilo',
+    'store': 'Negozio',
+    'season': 'Stagione',
+    'login': 'Accedi',
+    'register': 'Crea account',
+    'rematch': 'RIVINCITA',
+    'findAnother': 'CERCA UN ALTRO RIVALE',
+    'searchingRival': 'Cercando avversario...',
+    'goal': 'GOOOOOOL!',
+    'dailyQuestion': 'Domanda del giorno',
+    'survival': 'Sopravvivenza',
+    'reconnecting': 'Riconnessione...',
+    'history': 'Storico',
+    'friends': 'Amici',
+    'tournaments': 'Tornei',
+    'rivalries': 'Rivalità',
+  });
+
+  static final _de = AppStrings({
+    'appName': 'Futbolín',
+    'playNow': 'JETZT SPIELEN',
+    'privateMatch': 'Privates Spiel',
+    'ranking': 'Rangliste',
+    'missions': 'Missionen',
+    'profile': 'Profil',
+    'store': 'Shop',
+    'season': 'Saison',
+    'login': 'Anmelden',
+    'register': 'Konto erstellen',
+    'rematch': 'REVANCHE',
+    'findAnother': 'ANDEREN GEGNER SUCHEN',
+    'searchingRival': 'Gegner wird gesucht...',
+    'goal': 'TOOOOOOR!',
+    'dailyQuestion': 'Frage des Tages',
+    'survival': 'Überleben',
+    'reconnecting': 'Verbindung wird hergestellt...',
+    'history': 'Verlauf',
+    'friends': 'Freunde',
+    'tournaments': 'Turniere',
+    'rivalries': 'Rivalitäten',
   });
 }

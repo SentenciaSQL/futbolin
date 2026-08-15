@@ -18,6 +18,10 @@ class ProfileScreen extends ConsumerWidget {
               Text('${user.country ?? ''} · ${user.favoriteTeam ?? ''}'),
               Text('División ${user.division} · ${user.rankingPoints} pts'),
               const SizedBox(height: 24),
+              FilledButton(onPressed: () => context.push('/history'), child: const Text('Historial')),
+              const SizedBox(height: 8),
+              OutlinedButton(onPressed: () => context.push('/rivalries'), child: const Text('Rivalidades')),
+              const SizedBox(height: 24),
               FilledButton(
                 onPressed: () async {
                   await ref.read(authRepositoryProvider).logout();

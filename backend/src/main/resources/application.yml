@@ -74,6 +74,10 @@ app:
   oauth:
     google-client-id: ${GOOGLE_CLIENT_ID:}
     apple-audience: ${APPLE_AUDIENCE:}
+    allow-insecure-dev: ${OAUTH_ALLOW_INSECURE_DEV:false}
+  fcm:
+    project-id: ${FCM_PROJECT_ID:}
+    credentials-json: ${FCM_CREDENTIALS_JSON:}
   match:
     question-seconds: 10
     duration-seconds: 240
