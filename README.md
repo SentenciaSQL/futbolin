@@ -36,6 +36,8 @@ Clean Architecture en el backend:
 docker compose up --build
 ```
 
+En Windows, si el build falla con `./gradlew: not found`, actualiza el repo (`git pull`) y vuelve a construir. El Dockerfile ya corrige CRLF del wrapper.
+
 Servicios:
 
 - API: http://localhost:8080
