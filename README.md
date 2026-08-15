@@ -36,7 +36,7 @@ Clean Architecture en el backend:
 docker compose up --build
 ```
 
-En Windows, si el build falla con `./gradlew: not found`, actualiza el repo (`git pull`) y vuelve a construir. El Dockerfile ya corrige CRLF del wrapper.
+En Windows, si el build falla con `./gradlew: not found` o no encuentra `dist/futbolin-admin/browser`, actualiza el repo (`git pull`) y vuelve a construir. El Dockerfile del admin copia la carpeta que contiene `index.html`, sea cual sea la ruta de Angular.
 
 Servicios:
 
