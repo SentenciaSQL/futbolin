@@ -8,28 +8,31 @@ import { ApiService } from '../core/api.service';
   template: `
     <div class="flex justify-between items-center mb-6">
       <h1 class="text-3xl font-black">Preguntas</h1>
-      <label class="bg-gold text-black px-4 py-2 rounded font-bold cursor-pointer">
+      <label class="btn-gold cursor-pointer">
         Importar CSV/JSON/Excel
         <input type="file" hidden (change)="import($event)" />
       </label>
     </div>
-    <form class="grid grid-cols-2 gap-3 bg-slate-900 p-4 rounded-xl mb-6" (ngSubmit)="create()">
-      <input class="p-2 bg-black/40 rounded" [(ngModel)]="draft.promptEs" name="promptEs" placeholder="Pregunta ES" />
-      <input class="p-2 bg-black/40 rounded" [(ngModel)]="draft.promptEn" name="promptEn" placeholder="Question EN" />
-      <input class="p-2 bg-black/40 rounded" [(ngModel)]="draft.optionA" name="a" placeholder="Opción A" />
-      <input class="p-2 bg-black/40 rounded" [(ngModel)]="draft.optionB" name="b" placeholder="Opción B" />
-      <input class="p-2 bg-black/40 rounded" [(ngModel)]="draft.optionC" name="c" placeholder="Opción C" />
-      <input class="p-2 bg-black/40 rounded" [(ngModel)]="draft.optionD" name="d" placeholder="Opción D" />
-      <input class="p-2 bg-black/40 rounded" [(ngModel)]="draft.correctAnswer" name="ok" placeholder="A" />
-      <input class="p-2 bg-black/40 rounded" [(ngModel)]="draft.categoryCode" name="cat" placeholder="WORLD_CUP" />
-      <button class="col-span-2 bg-gold text-black font-bold py-2 rounded">Crear</button>
+    <form class="card grid grid-cols-2 gap-3 mb-6" (ngSubmit)="create()">
+      <input class="field" [(ngModel)]="draft.promptEs" name="promptEs" placeholder="Pregunta ES" />
+      <input class="field" [(ngModel)]="draft.promptEn" name="promptEn" placeholder="Question EN" />
+      <input class="field" [(ngModel)]="draft.optionA" name="a" placeholder="Opción A" />
+      <input class="field" [(ngModel)]="draft.optionB" name="b" placeholder="Opción B" />
+      <input class="field" [(ngModel)]="draft.optionC" name="c" placeholder="Opción C" />
+      <input class="field" [(ngModel)]="draft.optionD" name="d" placeholder="Opción D" />
+      <input class="field" [(ngModel)]="draft.correctAnswer" name="ok" placeholder="A" />
+      <input class="field" [(ngModel)]="draft.categoryCode" name="cat" placeholder="WORLD_CUP" />
+      <button class="btn-gold col-span-2 py-2">Crear</button>
     </form>
     @if (importMsg) {
       <p class="text-emerald-400 mb-2">{{ importMsg }}</p>
     }
     <div class="space-y-2">
       @for (q of questions; track q.id) {
-        <div class="bg-slate-900 p-3 rounded">{{ q.promptEs }} · {{ q.difficulty }}</div>
+        <div class="card flex justify-between gap-4">
+          <span>{{ q.promptEs }}</span>
+          <span class="text-gold text-sm font-bold">{{ q.difficulty }}</span>
+        </div>
       }
     </div>
   `,

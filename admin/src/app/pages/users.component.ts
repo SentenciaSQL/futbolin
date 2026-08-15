@@ -7,9 +7,14 @@ import { ApiService } from '../core/api.service';
     <h1 class="text-3xl font-black mb-6">Usuarios</h1>
     <div class="space-y-2">
       @for (u of users; track u.id) {
-        <div class="flex justify-between bg-slate-900 p-3 rounded">
-          <div>{{ u.username }} · {{ u.email }}</div>
-          <button class="text-sm bg-red-700 px-3 py-1 rounded" (click)="lock(u)">{{ u.locked ? 'Desbloquear' : 'Bloquear' }}</button>
+        <div class="card flex justify-between items-center">
+          <div>
+            <div class="font-bold">{{ u.username }}</div>
+            <div class="text-white/50 text-sm">{{ u.email }}</div>
+          </div>
+          <button class="rounded bg-red-700 px-3 py-1 text-sm font-semibold hover:bg-red-600" (click)="lock(u)">
+            {{ u.locked ? 'Desbloquear' : 'Bloquear' }}
+          </button>
         </div>
       }
     </div>

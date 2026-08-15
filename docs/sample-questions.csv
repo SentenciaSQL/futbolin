@@ -1,2 +1,9 @@
 question,question_en,option_a,option_b,option_c,option_d,correct_answer,category,difficulty,explanation
 ¿Quién ganó el Mundial de 1998?,Who won the 1998 World Cup?,Brasil,Francia,Italia,Croacia,B,WORLD_CUP,MEDIUM,Francia ganó en casa con gol de Zidane.
+¿Quién ganó el Mundial de Qatar 2022?,Who won the 2022 Qatar World Cup?,Argentina,Francia,Croacia,Marruecos,A,WORLD_CUP,MEDIUM,Argentina venció a Francia en los penales.
+¿Qué club ha ganado más Champions League?,Which club has won the most Champions League titles?,Real Madrid,AC Milan,Bayern Múnich,Liverpool,A,CHAMPIONS,EASY,Real Madrid lidera el palmarés.
+¿Quién es el máximo goleador histórico de LaLiga?,Who is LaLiga's all-time top scorer?,Lionel Messi,Cristiano Ronaldo,Telmo Zarra,Raúl,A,LALIGA,EASY,Messi superó los 400 goles en liga.
+¿Qué significa VAR?,What does VAR stand for?,Video Automatic Replay,Video Assistant Referee,Visual Action Review,Verified Assist Replay,B,TRIVIA,MEDIUM,Video Assistant Referee.
+¿Cuántos jugadores titulariza un equipo?,How many players does a team start?,10,11,12,9,B,RULES,EASY,Once jugadores.
+¿Quién ganó la Eurocopa 2024?,Who won Euro 2024?,España,Inglaterra,Francia,Alemania,A,EURO,EASY,España venció a Inglaterra en Berlín.
+¿En qué estadio juega el Liverpool?,Where does Liverpool play?,Anfield,Old Trafford,Etihad,Stamford Bridge,A,STADIUMS,MEDIUM,Anfield.

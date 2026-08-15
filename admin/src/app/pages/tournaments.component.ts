@@ -6,17 +6,15 @@ import { ApiService } from '../core/api.service';
   standalone: true,
   imports: [FormsModule],
   template: `
-    <div class="flex justify-between items-center mb-6">
-      <h1 class="text-3xl font-black">Torneos 16</h1>
-    </div>
-    <form class="grid grid-cols-2 gap-3 bg-slate-900 p-4 rounded-xl mb-6" (ngSubmit)="create()">
-      <input class="p-2 bg-black/40 rounded" [(ngModel)]="name" name="name" placeholder="Copa de fin de semana" />
-      <input class="p-2 bg-black/40 rounded" [(ngModel)]="theme" name="theme" placeholder="WEEKEND" />
-      <button class="col-span-2 bg-gold text-black font-bold py-2 rounded">Crear copa</button>
+    <h1 class="text-3xl font-black mb-6">Torneos 16</h1>
+    <form class="card grid grid-cols-2 gap-3 mb-6" (ngSubmit)="create()">
+      <input class="field" [(ngModel)]="name" name="name" placeholder="Copa de fin de semana" />
+      <input class="field" [(ngModel)]="theme" name="theme" placeholder="WEEKEND" />
+      <button class="btn-gold col-span-2 py-2">Crear copa</button>
     </form>
     <div class="space-y-2">
       @for (t of tournaments; track t.id) {
-        <div class="bg-slate-900 p-3 rounded">{{ t.name }} · {{ t.status }} · {{ t.size }} jugadores</div>
+        <div class="card">{{ t.name }} · {{ t.status }} · {{ t.size }} jugadores</div>
       }
     </div>
   `,

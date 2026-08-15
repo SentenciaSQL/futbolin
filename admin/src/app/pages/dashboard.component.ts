@@ -7,9 +7,9 @@ import { ApiService } from '../core/api.service';
     <h1 class="text-3xl font-black mb-6">Panel</h1>
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
       @for (k of keys; track k) {
-        <div class="bg-slate-900 p-5 rounded-xl">
-          <div class="text-white/60 text-sm">{{ k }}</div>
-          <div class="text-3xl font-black text-gold">{{ data[k] }}</div>
+        <div class="card">
+          <div class="text-white/60 text-sm uppercase tracking-wide">{{ labels[k] || k }}</div>
+          <div class="text-3xl font-black text-gold mt-1">{{ data[k] }}</div>
         </div>
       }
     </div>
@@ -18,6 +18,12 @@ import { ApiService } from '../core/api.service';
 export class DashboardComponent implements OnInit {
   data: Record<string, number> = {};
   keys: string[] = [];
+  labels: Record<string, string> = {
+    users: 'Usuarios',
+    questions: 'Preguntas',
+    liveMatches: 'Partidas en vivo',
+    openReports: 'Reportes abiertos',
+  };
   constructor(private api: ApiService) {}
   ngOnInit() {
     this.api.dashboard().subscribe((d) => {

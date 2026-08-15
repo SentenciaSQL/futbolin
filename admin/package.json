@@ -15,15 +15,15 @@
     "@angular/router": "^19.2.0",
     "rxjs": "^7.8.1",
     "tslib": "^2.8.1",
-    "zone.js": "^0.15.0"
+    "zone.js": "^0.15.0",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.5.3",
+    "tailwindcss": "^3.4.17"
   },
   "devDependencies": {
     "@angular/build": "^19.2.0",
     "@angular/cli": "^19.2.0",
     "@angular/compiler-cli": "^19.2.0",
-    "autoprefixer": "^10.4.20",
-    "postcss": "^8.5.3",
-    "tailwindcss": "^3.4.17",
     "typescript": "~5.7.2"
   }
 }

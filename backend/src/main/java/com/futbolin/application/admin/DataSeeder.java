@@ -2,6 +2,7 @@ package com.futbolin.application.admin;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.futbolin.application.tournament.TournamentService;
 import com.futbolin.core.props.AppProperties;
 import com.futbolin.data.entity.*;
 import com.futbolin.data.repository.*;
@@ -15,14 +16,17 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @Component
 public class DataSeeder implements ApplicationRunner {
@@ -39,6 +43,10 @@ public class DataSeeder implements ApplicationRunner {
     private final CosmeticRepository cosmetics;
     private final RankingSeasonRepository seasons;
     private final DailyLoginRewardRepository dailyRewards;
+    private final DailyChallengeRepository dailyChallenges;
+    private final FriendshipRepository friendships;
+    private final TournamentService tournamentService;
+    private final TournamentRepository tournaments;
     private final ObjectMapper objectMapper;
 
     public DataSeeder(
@@ -52,6 +60,10 @@ public class DataSeeder implements ApplicationRunner {
             CosmeticRepository cosmetics,
             RankingSeasonRepository seasons,
             DailyLoginRewardRepository dailyRewards,
+            DailyChallengeRepository dailyChallenges,
+            FriendshipRepository friendships,
+            TournamentService tournamentService,
+            TournamentRepository tournaments,
             ObjectMapper objectMapper
     ) {
         this.properties = properties;
@@ -64,6 +76,10 @@ public class DataSeeder implements ApplicationRunner {
         this.cosmetics = cosmetics;
         this.seasons = seasons;
         this.dailyRewards = dailyRewards;
+        this.dailyChallenges = dailyChallenges;
+        this.friendships = friendships;
+        this.tournamentService = tournamentService;
+        this.tournaments = tournaments;
         this.objectMapper = objectMapper;
     }
 
@@ -78,6 +94,9 @@ public class DataSeeder implements ApplicationRunner {
         seedCosmetics();
         seedSeason();
         seedDailyRewards();
+        seedDemoPlayers();
+        seedDailyChallenge();
+        seedWeekendCup();
     }
 
     private void seedAdmin() {
@@ -153,11 +172,19 @@ public class DataSeeder implements ApplicationRunner {
     }
 
     private void seedQuestions(Map<String, QuestionCategoryEntity> byCode) throws Exception {
-        if (questions.count() > 0) {
-            return;
-        }
-        JsonNode array = objectMapper.readTree(new ClassPathResource("seed/questions.json").getInputStream());
+        int before = (int) questions.count();
+        loadQuestionFile("seed/questions.json", byCode);
+        loadQuestionFile("seed/questions-extra.json", byCode);
+        log.info("Seeded questions: {} -> {}", before, questions.count());
+    }
+
+    private void loadQuestionFile(String path, Map<String, QuestionCategoryEntity> byCode) throws Exception {
+        JsonNode array = objectMapper.readTree(new ClassPathResource(path).getInputStream());
         for (JsonNode node : array) {
+            String prompt = node.get("promptEs").asText();
+            if (questions.existsByPromptEsIgnoreCase(prompt)) {
+                continue;
+            }
             QuestionCategoryEntity category = byCode.get(node.path("category").asText("WORLD_CUP"));
             if (category == null) {
                 log.warn("Skipping question with unknown category {}", node.path("category").asText());
@@ -167,11 +194,11 @@ public class DataSeeder implements ApplicationRunner {
             q.setCategory(category);
             q.setType(QuestionType.valueOf(node.path("type").asText("MULTIPLE_CHOICE")));
             q.setDifficulty(Difficulty.valueOf(node.path("difficulty").asText("MEDIUM")));
-            q.setPromptEs(node.get("promptEs").asText());
+            q.setPromptEs(prompt);
             q.setPromptEn(node.get("promptEn").asText());
             q.setExplanationEs(node.path("explanationEs").asText(null));
             q.setExplanationEn(node.path("explanationEn").asText(null));
-            q.setImageUrl(node.path("imageUrl").asText(null));
+            q.setImageUrl(blankToNull(node.path("imageUrl").asText(null)));
             q.setMetadataJson(node.path("metadata").isMissingNode() ? null : node.get("metadata").toString());
             q.setCorrectKey(node.path("correct").asText("A"));
             int i = 0;
@@ -187,7 +214,10 @@ public class DataSeeder implements ApplicationRunner {
             }
             questions.save(q);
         }
-        log.info("Seeded {} questions", questions.count());
+    }
+
+    private String blankToNull(String value) {
+        return value == null || value.isBlank() || "null".equals(value) ? null : value;
     }
 
     private void seedAchievements() {
@@ -296,5 +326,93 @@ public class DataSeeder implements ApplicationRunner {
             r.setCosmeticKey(cosmetic[i]);
             dailyRewards.save(r);
         }
+    }
+
+    private void seedDemoPlayers() {
+        record Demo(String email, String username, String name, String country, String team, int points, int wins, int losses) {}
+        List<Demo> demos = List.of(
+                new Demo("leo@futbolin.app", "leomessi", "Leo Messi", "AR", "Inter Miami", 2140, 42, 8),
+                new Demo("cr7@futbolin.app", "cr7", "Cristiano Ronaldo", "PT", "Al Nassr", 2080, 39, 11),
+                new Demo("mbappe@futbolin.app", "kmbappe", "Kylian Mbappé", "FR", "Real Madrid", 1960, 31, 12),
+                new Demo("haaland@futbolin.app", "ehaaland", "Erling Haaland", "NO", "Manchester City", 1880, 28, 9),
+                new Demo("vini@futbolin.app", "vinijr", "Vinícius Jr", "BR", "Real Madrid", 1840, 26, 10),
+                new Demo("salah@futbolin.app", "mosalah", "Mohamed Salah", "EG", "Liverpool", 1760, 24, 13),
+                new Demo("alexia@futbolin.app", "alexiaputellas", "Alexia Putellas", "ES", "Barcelona Femení", 1720, 22, 7),
+                new Demo("martha@futbolin.app", "marta10", "Marta", "BR", "Orlando Pride", 1680, 20, 8)
+        );
+        List<UserEntity> created = new java.util.ArrayList<>();
+        for (Demo demo : demos) {
+            UserEntity user = users.findByEmail(demo.email()).orElseGet(() -> {
+                UserEntity u = new UserEntity();
+                u.setEmail(demo.email());
+                u.setUsername(demo.username());
+                u.setPasswordHash(passwordEncoder.encode("Player123!"));
+                u.setRole(Role.USER);
+                u.setProvider(AuthProvider.LOCAL);
+                u.setEmailVerified(true);
+                UserProfileEntity p = new UserProfileEntity();
+                p.setUser(u);
+                p.setDisplayName(demo.name());
+                p.setCountry(demo.country());
+                p.setFavoriteTeam(demo.team());
+                p.setRankingPoints(demo.points());
+                p.setPeakRankingPoints(demo.points());
+                p.setDivision(Division.fromPoints(demo.points()));
+                p.setLevel(Math.max(1, demo.points() / 200));
+                p.setCoins(250);
+                p.setMatchesPlayed(demo.wins() + demo.losses());
+                p.setWins(demo.wins());
+                p.setLosses(demo.losses());
+                p.setGoalsScored(demo.wins() * 2);
+                p.setCorrectAnswers(demo.wins() * 12);
+                p.setTotalAnswers(demo.wins() * 16);
+                u.setProfile(p);
+                return users.save(u);
+            });
+            created.add(user);
+        }
+        if (created.size() >= 2) {
+            friend(created.get(0).getId(), created.get(1).getId());
+            friend(created.get(2).getId(), created.get(3).getId());
+        }
+        log.info("Demo players ready (password Player123!)");
+    }
+
+    private void friend(UUID a, UUID b) {
+        if (friendships.findByRequesterIdAndAddresseeId(a, b).isPresent()
+                || friendships.findByRequesterIdAndAddresseeId(b, a).isPresent()) {
+            return;
+        }
+        FriendshipEntity f = new FriendshipEntity();
+        f.setRequesterId(a);
+        f.setAddresseeId(b);
+        f.setStatus("ACCEPTED");
+        friendships.save(f);
+    }
+
+    private void seedDailyChallenge() {
+        if (dailyChallenges.findByChallengeDate(LocalDate.now()).isPresent()) {
+            return;
+        }
+        var page = questions.findByActiveTrue(PageRequest.of(0, 1));
+        if (page.isEmpty()) {
+            return;
+        }
+        DailyChallengeEntity challenge = new DailyChallengeEntity();
+        challenge.setChallengeDate(LocalDate.now());
+        challenge.setQuestion(page.getContent().getFirst());
+        dailyChallenges.save(challenge);
+    }
+
+    private void seedWeekendCup() {
+        if (tournaments.count() > 0) {
+            return;
+        }
+        TournamentEntity cup = tournamentService.create("Copa de fin de semana", "WEEKEND");
+        users.findByUsername("leomessi").ifPresent(u -> tournamentService.join(cup.getId(), u.getId()));
+        users.findByUsername("cr7").ifPresent(u -> tournamentService.join(cup.getId(), u.getId()));
+        users.findByUsername("kmbappe").ifPresent(u -> tournamentService.join(cup.getId(), u.getId()));
+        users.findByUsername("ehaaland").ifPresent(u -> tournamentService.join(cup.getId(), u.getId()));
+        log.info("Seeded weekend cup {}", cup.getSlug());
     }
 }

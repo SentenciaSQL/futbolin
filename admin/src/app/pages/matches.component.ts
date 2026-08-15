@@ -7,7 +7,7 @@ import { ApiService } from '../core/api.service';
     <h1 class="text-3xl font-black mb-6">Partidas</h1>
     <div class="space-y-2">
       @for (m of matches; track m.id) {
-        <div class="bg-slate-900 p-3 rounded">
+        <div class="card">
           {{ m.id }} · {{ m.status }} · {{ m.scoreA }}-{{ m.scoreB }}
         </div>
       }
