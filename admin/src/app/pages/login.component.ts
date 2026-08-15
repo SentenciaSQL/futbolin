@@ -7,12 +7,16 @@ import { ApiService } from '../core/api.service';
   standalone: true,
   imports: [FormsModule],
   template: `
-    <div class="min-h-screen grid place-items-center bg-navy">
-      <form class="bg-slate-900 p-8 rounded-2xl w-full max-w-sm space-y-4 border border-white/10" (ngSubmit)="submit()">
-        <h1 class="text-2xl font-black text-gold">Futbolín Admin</h1>
-        <input class="w-full p-3 rounded bg-black/40" [(ngModel)]="login" name="login" placeholder="admin@futbolin.app" />
-        <input class="w-full p-3 rounded bg-black/40" [(ngModel)]="password" name="password" type="password" placeholder="Admin123!" />
-        <button class="w-full bg-gold text-black font-bold py-3 rounded">Entrar</button>
+    <div class="min-h-screen grid place-items-center bg-gradient-to-b from-navy via-pitch to-navy p-6">
+      <form class="card w-full max-w-sm space-y-4" (ngSubmit)="submit()">
+        <div class="text-center space-y-1">
+          <p class="text-4xl">⚽</p>
+          <h1 class="text-3xl font-black text-gold">Futbolín</h1>
+          <p class="text-white/60 text-sm">Panel de dirección técnica</p>
+        </div>
+        <input class="field" [(ngModel)]="login" name="login" placeholder="admin@futbolin.app" />
+        <input class="field" [(ngModel)]="password" name="password" type="password" placeholder="Admin123!" />
+        <button class="btn-gold w-full py-3">Entrar</button>
         @if (error) {
           <p class="text-red-400 text-sm">{{ error }}</p>
         }

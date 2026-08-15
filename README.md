@@ -48,7 +48,10 @@ Servicios:
 
 Credenciales de desarrollo del panel:
 
-- `admin@futbolin.app` / `Admin123!`
+- Admin: `admin@futbolin.app` / `Admin123!`
+- Jugadores demo: `leo@futbolin.app`, `cr7@futbolin.app`, `mbappe@futbolin.app`, … / `Player123!`
+
+Al arrancar, el backend siembra ~90 preguntas, categorías, misiones, cosméticos, temporada, recompensas diarias, 8 jugadores de ranking, amistades y la Copa de fin de semana.
 
 Nunca uses estas credenciales en producción. Define `JWT_SECRET`, `DATABASE_PASSWORD` y OAuth por variables de entorno.
 
